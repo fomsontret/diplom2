@@ -15,7 +15,7 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
     private TextColorSchema schema;
 
     public TextGraphicsConverterImpl() {
-        // Схема по умолчанию
+   
         this.schema = new TextColorSchemaImpl();
     }
 
@@ -41,14 +41,14 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
 
     @Override
     public String convert(String url) throws IOException, BadImageSizeException {
-        // Загружаем изображение
+
         BufferedImage img = ImageIO.read(new URL(url));
 
         if (img == null) {
             throw new IOException("Не удалось загрузить изображение");
         }
 
-        // Проверяем соотношение сторон
+  
         if (maxRatio > 0) {
             double ratio = (double) Math.max(img.getWidth(), img.getHeight()) /
                     Math.min(img.getWidth(), img.getHeight());
@@ -57,16 +57,15 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
             }
         }
 
-        // Вычисляем новые размеры
+  
         int originalWidth = img.getWidth();
         int originalHeight = img.getHeight();
 
         int newWidth = originalWidth;
         int newHeight = originalHeight;
 
-        // Масштабируем с сохранением пропорций
         if (maxWidth > 0 && maxHeight > 0) {
-            // Если заданы оба ограничения
+   
             double widthRatio = (double) maxWidth / originalWidth;
             double heightRatio = (double) maxHeight / originalHeight;
             double ratio = Math.min(widthRatio, heightRatio);
@@ -76,7 +75,7 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
                 newHeight = (int) (originalHeight * ratio);
             }
         } else {
-            // Если задано только одно ограничение
+
             if (maxWidth > 0 && originalWidth > maxWidth) {
                 newWidth = maxWidth;
                 newHeight = (int) Math.round(originalHeight * ((double) maxWidth / originalWidth));
@@ -88,26 +87,23 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
             }
         }
 
-        // Убеждаемся, что размеры не нулевые
+
         newWidth = Math.max(newWidth, 1);
         newHeight = Math.max(newHeight, 1);
 
-        // Масштабируем изображение
+   
         Image scaledImage = img.getScaledInstance(newWidth, newHeight, BufferedImage.SCALE_SMOOTH);
 
-        // Создаем черно-белое изображение
+
         BufferedImage bwImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_BYTE_GRAY);
         Graphics2D graphics = bwImg.createGraphics();
         graphics.drawImage(scaledImage, 0, 0, null);
         graphics.dispose();
 
-        // Получаем доступ к пикселям
+
         WritableRaster bwRaster = bwImg.getRaster();
 
-        // Для отладки можно сохранить промежуточное изображение
-        // ImageIO.write(bwImg, "png", new File("debug.png"));
 
-        // Строим результат
         StringBuilder result = new StringBuilder();
         int[] pixel = new int[3];
 
@@ -115,7 +111,7 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
             for (int w = 0; w < newWidth; w++) {
                 int color = bwRaster.getPixel(w, h, pixel)[0];
                 char c = schema.convert(color);
-                // Дублируем символ для более широкого вывода
+  
                 result.append(c).append(c);
             }
             result.append("\n");
@@ -123,4 +119,5 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
 
         return result.toString();
     }
+
 }
